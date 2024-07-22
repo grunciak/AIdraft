@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -81,10 +80,15 @@ if monitoring_file and alarm_file:
 
     # Evaluate the model
     y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, zero_division=0)
-    recall = recall_score(y_test, y_pred, zero_division=0)
-    f1 = f1_score(y_test, y_pred, zero_division=0)
+
+    try:
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, zero_division=0)
+        recall = recall_score(y_test, y_pred, zero_division=0)
+        f1 = f1_score(y_test, y_pred, zero_division=0)
+    except ValueError as e:
+        st.write(f"Error calculating metrics: {e}")
+        accuracy = precision = recall = f1 = 0.0
 
     # Calculate correlations
     correlations = data[features + [selected_alarm]].corr()
@@ -114,3 +118,13 @@ if monitoring_file and alarm_file:
 
 else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
+"""
+
+# Save the updated application code to a new file
+final_app_file_path = '/mnt/data/Final_Streamlit_Predykcja_Alarmow_app.py'
+with open(final_app_file_path, 'w') as file:
+    file.write(app_code)
+
+final_app_file_path
+
+ 
