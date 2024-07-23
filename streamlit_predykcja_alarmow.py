@@ -59,7 +59,7 @@ if monitoring_file and alarm_file:
     def prepare_features(date):
         date = pd.to_datetime(date)
         hour = date.hour
-        day_of_week = date.dayofweek
+        day_of_week = date.day_ofweek
         
         # Get the most recent data up to the selected date
         recent_data = data[data['date'] <= date].tail(1)
@@ -85,8 +85,12 @@ if monitoring_file and alarm_file:
     except ValueError as e:
         st.write(f"Error training model: {e}")
 
-    # Evaluate the model
-    y_pred = model.predict(X_test)
+    # Evaluate the model with error handling
+    try:
+        y_pred = model.predict(X_test)
+    except ValueError as e:
+        st.write(f"Error predicting: {e}")
+        y_pred = np.zeros_like(y_test)
 
     try:
         accuracy = accuracy_score(y_test, y_pred)
@@ -104,11 +108,14 @@ if monitoring_file and alarm_file:
     if st.button('Sprawdź alarm', key="button_alarm"):
         input_data = prepare_features(selected_date)
         if input_data is not None:
-            prediction = model.predict(input_data)
-            if prediction[0] == 1:
-                st.write(f'Alarm wystąpi {selected_date}.')
-            else:
-                st.write(f'Brak alarmów {selected_date}.')
+            try:
+                prediction = model.predict(input_data)
+                if prediction[0] == 1:
+                    st.write(f'Alarm wystąpi {selected_date}.')
+                else:
+                    st.write(f'Brak alarmów {selected_date}.')
+            except ValueError as e:
+                st.write(f"Error predicting: {e}")
         else:
             st.write(f'Brak danych do predykcji dla wybranej daty.')
 
