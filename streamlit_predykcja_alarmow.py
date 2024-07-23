@@ -44,6 +44,10 @@ if monitoring_file and alarm_file:
     # List of features for model training
     features = data.columns.difference(['date'] + alarm_columns).tolist() + ['hour', 'day_of_week']
 
+    # Ensure all feature columns are numeric
+    for feature in features:
+        data[feature] = pd.to_numeric(data[feature], errors='coerce')
+
     # Selectbox for choosing the alarm column
     selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns, key="selectbox_alarm")
 
@@ -82,6 +86,9 @@ if monitoring_file and alarm_file:
     else:
         st.write(f"Unexpected target values: {unique_values}")
         y = y.apply(lambda x: 0 if x == 0 else 1)  # Convert to binary
+
+    # Handle missing values
+    X = X.fillna(0)
 
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -140,5 +147,6 @@ if monitoring_file and alarm_file:
 
 else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
+
 
 
