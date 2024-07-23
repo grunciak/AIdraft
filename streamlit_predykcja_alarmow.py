@@ -78,9 +78,12 @@ if monitoring_file and alarm_file:
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-    # Train the model
+    # Train the model with error handling
     model = XGBClassifier()
-    model.fit(X_train, y_train)
+    try:
+        model.fit(X_train, y_train)
+    except ValueError as e:
+        st.write(f"Error training model: {e}")
 
     # Evaluate the model
     y_pred = model.predict(X_test)
