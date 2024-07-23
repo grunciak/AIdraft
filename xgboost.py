@@ -124,8 +124,8 @@ else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
 """
 
-# Save to the specified file path
-file_path = '/mnt/data/Streamlit_Predykcja_Alarmow_Final_XGBoost.py'
+# Save the corrected application code to a new file
+file_path = '/mnt/data/Streamlit_Predykcja_Alarmow_Corrected_XGBoost.py'
 with open(file_path, 'w') as file:
     file.write(final_corrected_app_code)
 
