@@ -59,7 +59,7 @@ if monitoring_file and alarm_file:
     def prepare_features(date):
         date = pd.to_datetime(date)
         hour = date.hour
-        day_of_week = date.day_ofweek
+        day_of_week = date.dayofweek
         
         # Get the most recent data up to the selected date
         recent_data = data[data['date'] <= date].tail(1)
@@ -73,7 +73,15 @@ if monitoring_file and alarm_file:
 
     # Prepare features and target for model training
     X = data[features]
-    y = data[selected_alarm]
+    y = data[selected_alarm].astype(int)  # Ensure target is integer
+
+    # Check and clean target values
+    unique_values = np.unique(y)
+    if set(unique_values) <= {0, 1}:  # If binary
+        st.write(f"Target values are already binary: {unique_values}")
+    else:
+        st.write(f"Unexpected target values: {unique_values}")
+        y = y.apply(lambda x: 0 if x == 0 else 1)  # Convert to binary
 
     # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -132,3 +140,4 @@ if monitoring_file and alarm_file:
 
 else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
+
