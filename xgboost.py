@@ -79,7 +79,7 @@ if monitoring_file and alarm_file:
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
     # Train the model
-    model = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+    model = xgb.XGBClassifier(eval_metric='logloss')
     model.fit(X_train, y_train)
 
     # Evaluate the model
@@ -122,5 +122,6 @@ if monitoring_file and alarm_file:
 
 else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
+
 
 
