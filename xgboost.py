@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
-import xgboost as xgb
+from xgboost import XGBClassifier
 import datetime
 
 # Streamlit interface
@@ -79,7 +79,7 @@ if monitoring_file and alarm_file:
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
     # Train the model
-    model = xgb.XGBClassifier(eval_metric='logloss')
+    model = XGBClassifier()
     model.fit(X_train, y_train)
 
     # Evaluate the model
