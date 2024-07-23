@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -44,6 +43,12 @@ if monitoring_file and alarm_file:
 
     # List of features for model training
     features = data.columns.difference(['date'] + alarm_columns).tolist() + ['hour', 'day_of_week']
+
+    # Debugging: Check the length of features and data columns
+    st.write("## Features Length")
+    st.write(len(features))
+    st.write("## Data Columns Length")
+    st.write(len(data.columns))
 
     # Ensure all feature columns are numeric
     for feature in features:
@@ -154,4 +159,3 @@ if monitoring_file and alarm_file:
 
 else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
-
