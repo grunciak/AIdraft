@@ -1,8 +1,4 @@
-Sure! Streamlit's `file_uploader` widget allows users to drag and drop files directly into the application. I'll integrate this functionality into the provided Streamlit app so users can upload the monitoring and alarm data files via drag and drop.
 
-Here's the complete Streamlit app code with the drag-and-drop file upload functionality:
-
-```python
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -158,10 +154,4 @@ if monitoring_file and alarm_file:
 
 else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
-```
 
-In this code:
-- The `file_uploader` widgets are used to enable the drag-and-drop functionality for the monitoring and alarm data files.
-- The rest of the logic remains the same, ensuring that the data is read, cleaned, and used for training and predicting the alarm occurrences.
-
-Users can now drag and drop the appropriate Excel files to upload them and proceed with the alarm prediction process.
