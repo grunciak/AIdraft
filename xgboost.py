@@ -11,8 +11,8 @@ st.title('Predykcja Alarmów')
 st.write('Wybierz kolumnę alarmu oraz datę, aby zobaczyć, czy wystąpi alarm.')
 
 # File uploader for monitoring data
-monitoring_file = st.file_uploader("Wgraj plik z danymi monitorowania", type=["xlsx"])
-alarm_file = st.file_uploader("Wgraj plik z danymi alarmów", type=["xlsx"])
+monitoring_file = st.file_uploader("Wgraj plik z danymi monitorowania", type=["xlsx"], key="monitoring")
+alarm_file = st.file_uploader("Wgraj plik z danymi alarmów", type=["xlsx"], key="alarm")
 
 if monitoring_file and alarm_file:
     # Wczytanie danych
@@ -45,7 +45,7 @@ if monitoring_file and alarm_file:
     features = data.columns.difference(['date'] + alarm_columns).tolist() + ['hour', 'day_of_week']
 
     # Selectbox for choosing the alarm column
-    selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns)
+    selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns, key="alarm_column")
 
     # Obliczanie najnowszej daty
     latest_date = monitoring_data['date'].max()
@@ -53,7 +53,7 @@ if monitoring_file and alarm_file:
     max_date = min_date + datetime.timedelta(days=14)
 
     # Wybór daty przez użytkownika
-    selected_date = st.date_input('Wybierz datę', min_value=min_date, max_value=max_date)
+    selected_date = st.date_input('Wybierz datę', min_value=min_date, max_value=max_date, key="selected_date")
 
     # Przygotowanie danych do predykcji
     def prepare_features(date):
@@ -98,7 +98,7 @@ if monitoring_file and alarm_file:
     correlations = data[features + [selected_alarm]].corr()
 
     # Predykcja alarmu
-    if st.button('Sprawdź alarm'):
+    if st.button('Sprawdź alarm', key="check_alarm"):
         input_data = prepare_features(selected_date)
         if input_data is not None:
             prediction = model.predict(input_data)
@@ -122,3 +122,4 @@ if monitoring_file and alarm_file:
 
 else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
+
