@@ -11,8 +11,8 @@ st.title('Predykcja Alarmów')
 st.write('Wybierz kolumnę alarmu oraz datę, aby zobaczyć, czy wystąpi alarm.')
 
 # File uploader for monitoring data
-monitoring_file = st.file_uploader("Wgraj plik z danymi monitorowania", type=["xlsx"], key="monitoring_file_uploader")
-alarm_file = st.file_uploader("Wgraj plik z danymi alarmów", type=["xlsx"], key="alarm_file_uploader")
+monitoring_file = st.file_uploader("Wgraj plik z danymi monitorowania", type=["xlsx"], key="file_uploader_monitoring")
+alarm_file = st.file_uploader("Wgraj plik z danymi alarmów", type=["xlsx"], key="file_uploader_alarm")
 
 if monitoring_file and alarm_file:
     # Wczytanie danych
@@ -45,7 +45,7 @@ if monitoring_file and alarm_file:
     features = data.columns.difference(['date'] + alarm_columns).tolist() + ['hour', 'day_of_week']
 
     # Selectbox for choosing the alarm column
-    selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns, key="selectbox_alarm_column")
+    selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns, key="selectbox_alarm")
 
     # Obliczanie najnowszej daty
     latest_date = monitoring_data['date'].max()
@@ -53,7 +53,7 @@ if monitoring_file and alarm_file:
     max_date = min_date + datetime.timedelta(days=14)
 
     # Wybór daty przez użytkownika
-    selected_date = st.date_input('Wybierz datę', min_value=min_date, max_value=max_date, key="date_input_selected_date")
+    selected_date = st.date_input('Wybierz datę', min_value=min_date, max_value=max_date, key="date_input")
 
     # Przygotowanie danych do predykcji
     def prepare_features(date):
@@ -98,7 +98,7 @@ if monitoring_file and alarm_file:
     correlations = data[features + [selected_alarm]].corr()
 
     # Predykcja alarmu
-    if st.button('Sprawdź alarm', key="button_check_alarm"):
+    if st.button('Sprawdź alarm', key="button_alarm"):
         input_data = prepare_features(selected_date)
         if input_data is not None:
             prediction = model.predict(input_data)
@@ -122,4 +122,13 @@ if monitoring_file and alarm_file:
 
 else:
     st.write("Proszę wgrać oba pliki, aby kontynuować.")
+"""
+
+# Save to the specified file path
+file_path = '/mnt/data/Streamlit_Predykcja_Alarmow_Final_XGBoost.py'
+with open(file_path, 'w') as file:
+    file.write(final_corrected_app_code)
+
+file_path
+
 
