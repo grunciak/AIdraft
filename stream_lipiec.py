@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from xgboost import XGBClassifier
@@ -30,13 +31,18 @@ if monitoring_file and alarm_file:
     # Merge datasets on the date column
     data = pd.merge(monitoring_data, alarm_data, on='date', how='left')
 
-    # Handle missing data in alarm columns (fill with 0)
+    # List of alarm columns
     alarm_columns = [
         'SSP - awaria ogólna', 'SSP - awaria zasilania', 'SSP - pożar I stopnia',
         'SSP - pożar II stopnia', 'UDK - awaria ogólna', 'UDK - awaria zasilania',
         'UDK - sabotaż', 'UDK - włamanie'
     ]
-    data[alarm_columns] = data[alarm_columns].fillna(0)
+
+    # Identify alarm columns present in the data
+    existing_alarm_columns = [col for col in alarm_columns if col in data.columns]
+
+    # Fill NaN values in the existing alarm columns with 0
+    data[existing_alarm_columns] = data[existing_alarm_columns].fillna(0)
 
     # Feature engineering: extract hour and day of the week from 'date'
     data['hour'] = data['date'].dt.hour
@@ -58,10 +64,10 @@ if monitoring_file and alarm_file:
         data[feature] = pd.to_numeric(data[feature], errors='coerce')
 
     # List of features for model training
-    features = data.columns.difference(['date'] + alarm_columns).tolist() + ['hour', 'day_of_week']
+    features = data.columns.difference(['date'] + existing_alarm_columns).tolist() + ['hour', 'day_of_week']
 
     # Selectbox for choosing the alarm column
-    selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns, key="selectbox_alarm")
+    selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns, key="selectbox_alarm")
 
     # Calculate the latest date available
     latest_date = monitoring_data['date'].max()
