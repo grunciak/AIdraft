@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from xgboost import XGBClassifier
@@ -29,6 +30,14 @@ if monitoring_file and alarm_file:
     # Merge datasets on the date column
     data = monitoring_data.merge(alarm_data, on='date', how='left')
 
+    # Visualize missing data
+    st.write("## Visualizing Missing Data")
+    missing_data = data.isnull()
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax = sns.heatmap(missing_data, cbar=False, cmap='viridis')
+    plt.title('Missing Data Heatmap')
+    st.pyplot(fig)
+
     # Fill NaN values with 0 for alarm columns
     alarm_columns = [
         'SSP - awaria ogólna', 'SSP - awaria zasilania', 'SSP - pożar I stopnia',
@@ -44,18 +53,19 @@ if monitoring_file and alarm_file:
     # List of features for model training
     features = data.columns.difference(['date'] + alarm_columns).tolist() + ['hour', 'day_of_week']
 
-    # Debugging: Check the length of features and data columns
-    st.write("## Features Length")
-    st.write(len(features))
-    st.write("## Data Columns Length")
-    st.write(len(data.columns))
+    # Debugging: Compare features list and actual data columns
+    st.write("## Features List")
+    st.write(features)
+    st.write("## Data Columns")
+    st.write(data.columns)
 
     # Ensure all feature columns are numeric
     for feature in features:
         data[feature] = pd.to_numeric(data[feature], errors='coerce')
 
     # Handle missing values in feature columns
-    data[features] = data[features].fillna(0)
+    for feature in features:
+        data[feature].fillna(0, inplace=True)
 
     # Selectbox for choosing the alarm column
     selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns, key="selectbox_alarm")
@@ -72,7 +82,7 @@ if monitoring_file and alarm_file:
     def prepare_features(date):
         date = pd.to_datetime(date)
         hour = date.hour
-        day_of_week = date.dayofweek
+        day_of_week = date.day_ofweek
         
         # Get the most recent data up to the selected date
         recent_data = data[data['date'] <= date].tail(1)
