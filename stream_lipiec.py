@@ -79,6 +79,11 @@ if monitoring_file and alarm_file:
         # List of features for model training
         features = data.columns.difference(['date'] + existing_alarm_columns).tolist() + ['hour', 'day_of_week']
 
+        # Debugging: Print data types and check for NaNs
+        st.write("Data types of features:", data[features].dtypes)
+        st.write("Check for NaNs in features:", data[features].isnull().sum())
+        st.write("Check for NaNs in target column:", data[existing_alarm_columns].isnull().sum())
+
         # Selectbox for choosing the alarm column
         selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns, key="selectbox_alarm")
 
@@ -115,7 +120,12 @@ if monitoring_file and alarm_file:
 
         # Train the model
         model = XGBClassifier()
-        model.fit(X_train, y_train)
+        try:
+            model.fit(X_train, y_train)
+        except ValueError as e:
+            st.write(f"Error during model training: {e}")
+            st.write("Check data types and NaN values in features and target.")
+            st.stop()
 
         # Evaluate the model
         y_pred = model.predict(X_test)
