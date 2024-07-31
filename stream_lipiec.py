@@ -67,7 +67,11 @@ if monitoring_file and alarm_file:
     features = data.columns.difference(['date'] + existing_alarm_columns).tolist() + ['hour', 'day_of_week']
 
     # Selectbox for choosing the alarm column
-    selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns, key="selectbox_alarm")
+    if existing_alarm_columns:
+        selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns, key="selectbox_alarm")
+    else:
+        st.write("No alarm columns are available in the uploaded data.")
+        st.stop()
 
     # Calculate the latest date available
     latest_date = monitoring_data['date'].max()
