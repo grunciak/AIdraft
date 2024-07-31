@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 import datetime
 
@@ -29,13 +29,16 @@ if monitoring_file and alarm_file:
     # Merge datasets on the date column
     data = monitoring_data.merge(alarm_data, on='date', how='left')
 
-    # Handle missing data: Drop columns with too many missing values
-    threshold = 0.3  # Threshold to drop columns, e.g., 30% missing values
-    data = data[data.columns[data.isnull().mean() < threshold]]
+    # Separate numeric and non-numeric columns
+    numeric_cols = data.select_dtypes(include=np.number).columns
+    non_numeric_cols = data.select_dtypes(exclude=np.number).columns
 
-    # For remaining missing data, use mean imputation for numerical features
+    # Handle missing data in numeric columns using mean imputation
     imputer = SimpleImputer(strategy='mean')
-    data_filled = pd.DataFrame(imputer.fit_transform(data), columns=data.columns)
+    data[numeric_cols] = imputer.fit_transform(data[numeric_cols])
+
+    # For non-numeric columns, fill missing data with forward fill as an example
+    data[non_numeric_cols] = data[non_numeric_cols].fillna(method='ffill')
 
     # Fill NaN values with 0 for alarm columns
     alarm_columns = [
@@ -43,18 +46,21 @@ if monitoring_file and alarm_file:
         'SSP - pożar II stopnia', 'UDK - awaria ogólna', 'UDK - awaria zasilania',
         'UDK - sabotaż', 'UDK - włamanie'
     ]
-    data_filled[alarm_columns] = data_filled[alarm_columns].fillna(0)
+    data[alarm_columns] = data[alarm_columns].fillna(0)
 
     # Feature engineering
-    data_filled['hour'] = data_filled['date'].dt.hour
-    data_filled['day_of_week'] = data_filled['date'].dt.dayofweek
+    data['hour'] = data['date'].dt.hour
+    data['day_of_week'] = data['date'].dt.dayofweek
 
     # List of features for model training
-    features = data_filled.columns.difference(['date'] + alarm_columns).tolist() + ['hour', 'day_of_week']
+    features = data.columns.difference(['date'] + alarm_columns).tolist() + ['hour', 'day_of_week']
 
     # Ensure all feature columns are numeric
     for feature in features:
-        data_filled[feature] = pd.to_numeric(data_filled[feature], errors='coerce')
+        data[feature] = pd.to_numeric(data[feature], errors='coerce')
+
+    # Handle missing values in feature columns
+    data[features] = data[features].fillna(0)
 
     # Selectbox for choosing the alarm column
     selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns, key="selectbox_alarm")
@@ -74,7 +80,7 @@ if monitoring_file and alarm_file:
         day_of_week = date.dayofweek
         
         # Get the most recent data up to the selected date
-        recent_data = data_filled[data_filled['date'] <= date].tail(1)
+        recent_data = data[data['date'] <= date].tail(1)
         if recent_data.empty:
             return None
         
@@ -84,8 +90,8 @@ if monitoring_file and alarm_file:
         return recent_data[features]
 
     # Prepare features and target for model training
-    X = data_filled[features]
-    y = data_filled[selected_alarm].astype(int)  # Ensure target is integer
+    X = data[features]
+    y = data[selected_alarm].astype(int)  # Ensure target is integer
 
     # Check and clean target values
     unique_values = np.unique(y)
@@ -128,7 +134,7 @@ if monitoring_file and alarm_file:
         accuracy = precision = recall = f1 = 0.0
 
     # Calculate correlations
-    correlations = data_filled[features + [selected_alarm]].corr()
+    correlations = data[features + [selected_alarm]].corr()
 
     # Predykcja alarmu
     if st.button('Sprawdź alarm', key="button_alarm"):
