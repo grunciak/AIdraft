@@ -33,13 +33,16 @@ if monitoring_file and alarm_file:
     alarm_data['date'] = pd.to_datetime(alarm_data['date'])
 
     # Merge datasets on the date column
-    data = pd.merge(monitoring_data, alarm_data, on='date', how='left')
+    data = pd.merge(monitoring_data, alarm_data, on='date', how='left', suffixes=('_monitor', '_alarm'))
 
-    # List of alarm columns (update as needed based on actual column names)
+    # Display columns after merge
+    st.write("Columns in merged data:", data.columns.tolist())
+
+    # List of alarm columns
     alarm_columns = [
-        'SSP - awaria ogólna', 'SSP - awaria zasilania', 'SSP - pożar I stopnia',
-        'SSP - pożar II stopnia', 'UDK - awaria ogólna', 'UDK - awaria zasilania',
-        'UDK - sabotaż', 'UDK - włamanie'
+        'SSP - awaria ogólna_alarm', 'SSP - awaria zasilania_alarm', 'SSP - pożar I stopnia_alarm',
+        'SSP - pożar II stopnia_alarm', 'UDK - awaria ogólna_alarm', 'UDK - awaria zasilania_alarm',
+        'UDK - sabotaż_alarm', 'UDK - włamanie_alarm'
     ]
 
     # Identify alarm columns present in the data
