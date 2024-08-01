@@ -9,11 +9,11 @@ import datetime
 
 # Streamlit interface
 st.title('Predykcja Alarmów')
-st.write('Wybierz kolumnę alarmu oraz datę, aby zobaczyć, czy wystąpi alarm.')
+st.write('Wgraj pliki z danymi monitorowania i alarmów.')
 
 # File uploader for monitoring data
-monitoring_file = st.file_uploader("Wgraj plik z danymi monitorowania", type=["xlsx"], key="file_uploader_monitoring")
-alarm_file = st.file_uploader("Wgraj plik z danymi alarmów", type=["xlsx"], key="file_uploader_alarm")
+monitoring_file = st.file_uploader("Dane monitorowania", type=["xlsx"], key="file_uploader_monitoring")
+alarm_file = st.file_uploader("Dane alarmów", type=["xlsx"], key="file_uploader_alarm")
 
 if monitoring_file and alarm_file:
     # Read the uploaded Excel files
@@ -61,28 +61,23 @@ if monitoring_file and alarm_file:
         data['hour'] = data['date'].dt.hour
         data['day_of_week'] = data['date'].dt.dayofweek
 
-        # Separate numeric columns for imputation
-        numeric_cols = data.select_dtypes(include=np.number).columns
-        non_numeric_cols = data.select_dtypes(exclude=np.number).columns
-
-        # Impute missing values in numeric columns using the mean
-        imputer = SimpleImputer(strategy='mean')
-        data[numeric_cols] = imputer.fit_transform(data[numeric_cols])
-
-        # Handle missing data in non-numeric columns (forward fill)
-        data[non_numeric_cols] = data[non_numeric_cols].fillna(method='ffill')
-
         # Ensure all numeric columns are properly formatted
-        for feature in numeric_cols:
-            data[feature] = pd.to_numeric(data[feature], errors='coerce')
+        numeric_cols = data.select_dtypes(include=[np.number]).columns
+
+        # Convert all columns to numeric, forcing errors to NaN
+        data[numeric_cols] = data[numeric_cols].apply(pd.to_numeric, errors='coerce')
+
+        # Check for and handle NaN values
+        if data[numeric_cols].isnull().any().any():
+            st.write("NaN values detected in numeric features, filling with mean values.")
+            imputer = SimpleImputer(strategy='mean')
+            data[numeric_cols] = imputer.fit_transform(data[numeric_cols])
+
+        # Debugging: Check for remaining NaN values
+        st.write("Check for NaNs in numeric features after handling:", data[numeric_cols].isnull().sum())
 
         # List of features for model training
-        features = data.columns.difference(['date'] + existing_alarm_columns).tolist() + ['hour', 'day_of_week']
-
-        # Debugging: Print data types and check for NaNs
-        st.write("Data types of features:", data[features].dtypes)
-        st.write("Check for NaNs in features:", data[features].isnull().sum())
-        st.write("Unique values in target variable (y):", data[existing_alarm_columns].apply(pd.Series.nunique))
+        features = numeric_cols.tolist()
 
         # Selectbox for choosing the alarm column
         selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns, key="selectbox_alarm")
@@ -90,16 +85,13 @@ if monitoring_file and alarm_file:
         # Clean target variable (y) to ensure binary classification (0 or 1)
         y = data[selected_alarm].apply(lambda x: 0 if x == 0 else 1)
 
-        # Check that all features are numeric and there are no NaNs
-        if data[features].isnull().any().any():
-            st.write("Error: NaN values detected in features.")
+        # Check that the target variable is binary
+        unique_targets = y.unique()
+        if len(unique_targets) > 2 or not set(unique_targets).issubset({0, 1}):
+            st.write(f"Error: Target variable has unexpected values: {unique_targets}")
             st.stop()
 
-        if y.isnull().any():
-            st.write("Error: NaN values detected in the target variable.")
-            st.stop()
-
-        # Debugging: Print data types of features to ensure they are all numeric
+        # Check data types of features
         st.write("Feature data types:", data[features].dtypes)
 
         # Calculate the latest date available
