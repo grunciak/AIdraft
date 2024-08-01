@@ -157,7 +157,7 @@ if monitoring_file and alarm_file:
         correlations = correlations.astype(float)
 
         st.write(f'## Korelacje cech z kolumną {selected_alarm}')
-        st.write(correlations[[selected_alarm]])
+        st.dataframe(correlations[[selected_alarm]])
 
         # Alarm prediction
         if st.button('Sprawdź alarm', key="button_alarm"):
