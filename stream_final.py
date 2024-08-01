@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from xgboost import XGBClassifier
+import datetime
 
 # Streamlit interface
 st.title('Predykcja Alarmów z Pojedynczego Pliku')
@@ -90,35 +91,30 @@ if uploaded_file:
             st.write(f'## Korelacje cech z kolumną {selected_alarm}')
             st.dataframe(correlations[[selected_alarm]])
 
-            # User date input
-            selected_date = st.date_input('Wybierz datę', min_value=data['date'].min().date(), max_value=data['date'].max().date())
+            # User date input, allowing future dates
+            max_date_in_data = data['date'].max()
+            future_max_date = max_date_in_data + datetime.timedelta(days=365)
+            selected_date = st.date_input('Wybierz datę', min_value=max_date_in_data, max_value=future_max_date)
 
             # Prediction for selected date
             def prepare_features(date):
-                date = pd.to_datetime(date)
                 hour = date.hour
                 day_of_week = date.dayofweek
 
-                # Get the most recent data up to the selected date
-                recent_data = data[data['date'] <= date].tail(1)
-                if recent_data.empty:
-                    return None
-
+                # Use the most recent available data to fill other features
+                recent_data = data.tail(1).copy()
                 recent_data['hour'] = hour
                 recent_data['day_of_week'] = day_of_week
 
                 return recent_data[features]
 
             if st.button('Sprawdź alarm'):
-                input_data = prepare_features(selected_date)
-                if input_data is not None:
-                    prediction = model.predict(input_data)
-                    if prediction[0] == 1:
-                        st.write(f'Alarm wystąpi {selected_date}.')
-                    else:
-                        st.write(f'Brak alarmów {selected_date}.')
+                input_data = prepare_features(pd.to_datetime(selected_date))
+                prediction = model.predict(input_data)
+                if prediction[0] == 1:
+                    st.write(f'Alarm wystąpi {selected_date}.')
                 else:
-                    st.write(f'Brak danych do predykcji dla wybranej daty.')
+                    st.write(f'Brak alarmów {selected_date}.')
     else:
         st.write("Brak dostępnych kolumn alarmowych w danych.")
 else:
