@@ -4,7 +4,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from xgboost import XGBClassifier
-import datetime
 
 # Streamlit interface
 st.title('Predykcja Alarmów z Pojedynczego Pliku')
@@ -17,45 +16,48 @@ if uploaded_file:
     # Read the uploaded Excel file
     data = pd.read_excel(uploaded_file)
 
-    # Convert 'date' column to datetime
-    data['date'] = pd.to_datetime(data['date'])
+    # Display all column names
+    st.write("Dostępne kolumny:", data.columns.tolist())
+
+    # Check for a 'date' column and convert it to datetime
+    if 'date' in data.columns:
+        data['date'] = pd.to_datetime(data['date'])
+    else:
+        st.write("Brak kolumny 'date'.")
+        st.stop()
 
     # Display the first few rows of the dataset for verification
     st.write("Podgląd danych:", data.head())
-    st.write("Dostępne kolumny:", data.columns.tolist())
 
-    # List of expected alarm columns
-    alarm_columns = [
-        'SSP - awaria ogólna', 'SSP - awaria zasilania', 'SSP - pożar I stopnia',
-        'SSP - pożar II stopnia', 'UDK - awaria ogólna', 'UDK - awaria zasilania',
-        'UDK - sabotaż', 'UDK - włamanie'
-    ]
+    # Assume alarm columns are those with numeric data, excluding the 'date' and 'hour', 'day_of_week'
+    numeric_cols = data.select_dtypes(include=[np.number]).columns.tolist()
+    alarm_columns = [col for col in numeric_cols if col not in ['hour', 'day_of_week']]
 
-    # Identify which of these alarm columns are present in the data
-    existing_alarm_columns = [col for col in alarm_columns if col in data.columns]
+    st.write("Zidentyfikowane kolumny alarmów:", alarm_columns)
 
-    st.write("Istniejące kolumny alarmów w danych:", existing_alarm_columns)
+    if alarm_columns:
+        # Selectbox for choosing the alarm column
+        selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns)
 
-    if existing_alarm_columns:
-        # Fill NaN values in the existing alarm columns with 0
-        data[existing_alarm_columns] = data[existing_alarm_columns].fillna(0)
+        # Fill NaN values in the selected alarm column with 0
+        data[selected_alarm] = data[selected_alarm].fillna(0)
 
         # Feature engineering: extract hour and day of the week from 'date'
         data['hour'] = data['date'].dt.hour
         data['day_of_week'] = data['date'].dt.dayofweek
 
         # List of features for model training
-        features = data.columns.difference(['date'] + existing_alarm_columns).tolist() + ['hour', 'day_of_week']
-
-        # Selectbox for choosing the alarm column
-        selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns)
+        features = [col for col in data.columns if col not in ['date', selected_alarm]]
 
         # Prepare features and target for model training
         X = data[features]
         y = data[selected_alarm].apply(lambda x: 0 if x == 0 else 1)  # Ensure binary classification
 
-        # Check that the target variable is binary
+        # Display unique values in the target to debug potential issues
         unique_targets = y.unique()
+        st.write("Unikalne wartości w kolumnie docelowej (y):", unique_targets)
+
+        # Check that the target variable is binary
         if len(unique_targets) > 2 or not set(unique_targets).issubset({0, 1}):
             st.write(f"Error: Target variable has unexpected values: {unique_targets}")
         else:
