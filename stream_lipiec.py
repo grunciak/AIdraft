@@ -149,6 +149,13 @@ if monitoring_file and alarm_file:
 
         # Display correlations
         correlations = data[features + [selected_alarm]].corr()
+
+        # Handle NaN values in correlation data
+        correlations = correlations.fillna(0)
+
+        # Ensure the correlation data is numeric
+        correlations = correlations.astype(float)
+
         st.write(f'## Korelacje cech z kolumną {selected_alarm}')
         st.write(correlations[[selected_alarm]])
 
