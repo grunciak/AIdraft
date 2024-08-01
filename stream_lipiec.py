@@ -79,16 +79,28 @@ if monitoring_file and alarm_file:
         # List of features for model training
         features = data.columns.difference(['date'] + existing_alarm_columns).tolist() + ['hour', 'day_of_week']
 
+        # Debugging: Print data types and check for NaNs
+        st.write("Data types of features:", data[features].dtypes)
+        st.write("Check for NaNs in features:", data[features].isnull().sum())
+        st.write("Unique values in target variable (y):", data[existing_alarm_columns].apply(pd.Series.nunique))
+
         # Selectbox for choosing the alarm column
         selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns, key="selectbox_alarm")
 
         # Clean target variable (y) to ensure binary classification (0 or 1)
         y = data[selected_alarm].apply(lambda x: 0 if x == 0 else 1)
 
-        # Debugging: Print data types and check for NaNs
-        st.write("Data types of features:", data[features].dtypes)
-        st.write("Check for NaNs in features:", data[features].isnull().sum())
-        st.write("Unique values in target variable (y):", y.unique())
+        # Check that all features are numeric and there are no NaNs
+        if data[features].isnull().any().any():
+            st.write("Error: NaN values detected in features.")
+            st.stop()
+
+        if y.isnull().any():
+            st.write("Error: NaN values detected in the target variable.")
+            st.stop()
+
+        # Debugging: Print data types of features to ensure they are all numeric
+        st.write("Feature data types:", data[features].dtypes)
 
         # Calculate the latest date available
         latest_date = monitoring_data['date'].max()
