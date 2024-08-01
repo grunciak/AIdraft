@@ -79,13 +79,16 @@ if monitoring_file and alarm_file:
         # List of features for model training
         features = data.columns.difference(['date'] + existing_alarm_columns).tolist() + ['hour', 'day_of_week']
 
+        # Selectbox for choosing the alarm column
+        selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns, key="selectbox_alarm")
+
+        # Clean target variable (y) to ensure binary classification (0 or 1)
+        y = data[selected_alarm].apply(lambda x: 0 if x == 0 else 1)
+
         # Debugging: Print data types and check for NaNs
         st.write("Data types of features:", data[features].dtypes)
         st.write("Check for NaNs in features:", data[features].isnull().sum())
-        st.write("Check for NaNs in target column:", data[existing_alarm_columns].isnull().sum())
-
-        # Selectbox for choosing the alarm column
-        selected_alarm = st.selectbox('Wybierz kolumnę alarmu', existing_alarm_columns, key="selectbox_alarm")
+        st.write("Unique values in target variable (y):", y.unique())
 
         # Calculate the latest date available
         latest_date = monitoring_data['date'].max()
@@ -113,7 +116,6 @@ if monitoring_file and alarm_file:
 
         # Prepare features and target for model training
         X = data[features]
-        y = data[selected_alarm].astype(int)
 
         # Train-test split
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
