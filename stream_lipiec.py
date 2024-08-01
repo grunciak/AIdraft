@@ -22,16 +22,19 @@ if uploaded_file:
 
     # Display the first few rows of the dataset for verification
     st.write("Podgląd danych:", data.head())
+    st.write("Dostępne kolumny:", data.columns.tolist())
 
-    # List of alarm columns
+    # List of expected alarm columns
     alarm_columns = [
         'SSP - awaria ogólna', 'SSP - awaria zasilania', 'SSP - pożar I stopnia',
         'SSP - pożar II stopnia', 'UDK - awaria ogólna', 'UDK - awaria zasilania',
         'UDK - sabotaż', 'UDK - włamanie'
     ]
 
-    # Ensure alarm columns exist in the dataset
+    # Identify which of these alarm columns are present in the data
     existing_alarm_columns = [col for col in alarm_columns if col in data.columns]
+
+    st.write("Istniejące kolumny alarmów w danych:", existing_alarm_columns)
 
     if existing_alarm_columns:
         # Fill NaN values in the existing alarm columns with 0
@@ -116,3 +119,4 @@ if uploaded_file:
         st.write("Brak dostępnych kolumn alarmowych w danych.")
 else:
     st.write("Proszę wgrać plik z danymi, aby kontynuować.")
+
