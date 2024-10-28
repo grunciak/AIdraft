@@ -111,5 +111,11 @@ if uploaded_file:
             st.write("Błąd przy stosowaniu SMOTEENN:", e)
             st.write("Możliwe, że liczba próbek klasy alarmowej jest zbyt mała do wykonania SMOTEENN.")
 
+        # Analiza korelacji
+        st.write("## Korelacja cech z wybraną kolumną alarmową")
+        correlation_matrix = data[features + [selected_alarm]].corr()
+        st.write("Korelacje między cechami a kolumną alarmową:")
+        st.dataframe(correlation_matrix[[selected_alarm]].sort_values(by=selected_alarm, ascending=False))
+
 else:
     st.write("Proszę wgrać plik z danymi, aby kontynuować.")
