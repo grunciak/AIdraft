@@ -41,11 +41,6 @@ if uploaded_file:
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-        # Define sampling methods
-        smote = SMOTE(random_state=42)
-        undersampler = RandomUnderSampler(random_state=42)
-        smoteenn = SMOTEENN(random_state=42)
-
         # Original model without sampling
         model = XGBClassifier()
         model.fit(X_train, y_train)
@@ -59,21 +54,31 @@ if uploaded_file:
         st.write("## Wyniki bez balansowania")
         st.write(original_metrics)
 
-        # SMOTE
-        X_res, y_res = smote.fit_resample(X_train, y_train)
-        model_smote = XGBClassifier()
-        model_smote.fit(X_res, y_res)
-        y_pred_smote = model_smote.predict(X_test)
-        smote_metrics = {
-            "Accuracy": accuracy_score(y_test, y_pred_smote),
-            "Precision": precision_score(y_test, y_pred_smote, zero_division=0),
-            "Recall": recall_score(y_test, y_pred_smote, zero_division=0),
-            "F1-score": f1_score(y_test, y_pred_smote, zero_division=0)
-        }
-        st.write("## Wyniki z SMOTE")
-        st.write(smote_metrics)
+        # Diagnostyka - sprawdzenie rozkładu klas przed SMOTE
+        class_counts = y_train.value_counts()
+        st.write("Rozkład klas w y_train:", class_counts)
+
+        # Zastosowanie SMOTE z mniejszym k_neighbors, jeśli liczba próbek jest ograniczona
+        smote = SMOTE(random_state=42, k_neighbors=2)
+        try:
+            X_res, y_res = smote.fit_resample(X_train, y_train)
+            model_smote = XGBClassifier()
+            model_smote.fit(X_res, y_res)
+            y_pred_smote = model_smote.predict(X_test)
+            smote_metrics = {
+                "Accuracy": accuracy_score(y_test, y_pred_smote),
+                "Precision": precision_score(y_test, y_pred_smote, zero_division=0),
+                "Recall": recall_score(y_test, y_pred_smote, zero_division=0),
+                "F1-score": f1_score(y_test, y_pred_smote, zero_division=0)
+            }
+            st.write("## Wyniki z SMOTE")
+            st.write(smote_metrics)
+        except ValueError as e:
+            st.write("Błąd przy stosowaniu SMOTE:", e)
+            st.write("Możliwe, że liczba próbek klasy alarmowej jest zbyt mała do wykonania SMOTE.")
 
         # Undersampling
+        undersampler = RandomUnderSampler(random_state=42)
         X_res, y_res = undersampler.fit_resample(X_train, y_train)
         model_undersample = XGBClassifier()
         model_undersample.fit(X_res, y_res)
@@ -88,18 +93,23 @@ if uploaded_file:
         st.write(undersample_metrics)
 
         # SMOTE + ENN
-        X_res, y_res = smoteenn.fit_resample(X_train, y_train)
-        model_smoteenn = XGBClassifier()
-        model_smoteenn.fit(X_res, y_res)
-        y_pred_smoteenn = model_smoteenn.predict(X_test)
-        smoteenn_metrics = {
-            "Accuracy": accuracy_score(y_test, y_pred_smoteenn),
-            "Precision": precision_score(y_test, y_pred_smoteenn, zero_division=0),
-            "Recall": recall_score(y_test, y_pred_smoteenn, zero_division=0),
-            "F1-score": f1_score(y_test, y_pred_smoteenn, zero_division=0)
-        }
-        st.write("## Wyniki z SMOTEENN")
-        st.write(smoteenn_metrics)
+        smoteenn = SMOTEENN(random_state=42)
+        try:
+            X_res, y_res = smoteenn.fit_resample(X_train, y_train)
+            model_smoteenn = XGBClassifier()
+            model_smoteenn.fit(X_res, y_res)
+            y_pred_smoteenn = model_smoteenn.predict(X_test)
+            smoteenn_metrics = {
+                "Accuracy": accuracy_score(y_test, y_pred_smoteenn),
+                "Precision": precision_score(y_test, y_pred_smoteenn, zero_division=0),
+                "Recall": recall_score(y_test, y_pred_smoteenn, zero_division=0),
+                "F1-score": f1_score(y_test, y_pred_smoteenn, zero_division=0)
+            }
+            st.write("## Wyniki z SMOTEENN")
+            st.write(smoteenn_metrics)
+        except ValueError as e:
+            st.write("Błąd przy stosowaniu SMOTEENN:", e)
+            st.write("Możliwe, że liczba próbek klasy alarmowej jest zbyt mała do wykonania SMOTEENN.")
 
 else:
     st.write("Proszę wgrać plik z danymi, aby kontynuować.")
