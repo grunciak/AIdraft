@@ -92,8 +92,8 @@ if uploaded_file:
         st.write("## Wyniki z undersamplingiem")
         st.write(undersample_metrics)
 
-        # SMOTE + ENN
-        smoteenn = SMOTEENN(random_state=42)
+        # SMOTE + ENN with k_neighbors=2
+        smoteenn = SMOTEENN(smote=SMOTE(k_neighbors=2), random_state=42)
         try:
             X_res, y_res = smoteenn.fit_resample(X_train, y_train)
             model_smoteenn = XGBClassifier()
