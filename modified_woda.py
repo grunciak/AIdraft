@@ -65,11 +65,11 @@ def main():
 
         # Wybór daty do predykcji
     selected_date = st.date_input("Wybierz datę do predykcji zużycia wody")
-        if st.button('Przewiduj'):
-            selected_date = dt.datetime.strptime(str(selected_date), '%Y-%m-%d')
-            selected_date_ordinal = selected_date.toordinal()
-            predicted_consumption = model.predict([[selected_date_ordinal]])
-            st.write(f'Przewidywane zużycie wody na dzień {selected_date.date()}: {predicted_consumption[0]:.2f}')
+    if st.button('Przewiduj'):
+        selected_date = dt.datetime.strptime(str(selected_date), '%Y-%m-%d')
+        selected_date_ordinal = selected_date.toordinal()
+        predicted_consumption = model.predict([[selected_date_ordinal]])
+        st.write(f'Przewidywane zużycie wody na dzień {selected_date.date()}: {predicted_consumption[0]:.2f}')
 
 if __name__ == '__main__':
     main()
