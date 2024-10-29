@@ -25,46 +25,46 @@ def main():
     # uploaded_file = st.file_uploader("Wybierz plik Excel", type=["xls","xlsx"])
     df = load_data()
 
-        # Wyświetlanie załadowanych danych
-        st.write("Wyświetlanie pierwszych 5 wierszy danych:")
-        st.write(df.head())
+    # Wyświetlanie załadowanych danych
+    st.write("Wyświetlanie pierwszych 5 wierszy danych:")
+    st.write(df.head())
 
-        # Przygotowanie danych do modelu
-        df['timestamp'] = df['data'].map(dt.datetime.toordinal)
-        X = df['timestamp'].values.reshape(-1,1)
-        y = df['zuzycie'].values
+    # Przygotowanie danych do modelu
+    df['timestamp'] = df['data'].map(dt.datetime.toordinal)
+    X = df['timestamp'].values.reshape(-1,1)
+    y = df['zuzycie'].values
 
-        # Podział danych na zestaw treningowy i testowy
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+     # Podział danych na zestaw treningowy i testowy
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
         # Trenowanie modelu
-        model = LinearRegression()
-        model.fit(X_train, y_train)
+    model = LinearRegression()
+    model.fit(X_train, y_train)
 
         # Przewidywania na podstawie modelu
-        y_pred = model.predict(X_test)
+    y_pred = model.predict(X_test)
 
         # Obliczanie i wyświetlanie błędu średniokwadratowego i współczynnika determinacji R^2
-        mse = mean_squared_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
 
-        st.write(f'Błąd średniokwadratowy (MSE): {mse:.2f}')
-        st.write(f'Współczynnik determinacji (R^2): {r2:.2f}')
+    st.write(f'Błąd średniokwadratowy (MSE): {mse:.2f}')
+    st.write(f'Współczynnik determinacji (R^2): {r2:.2f}')
 
         # Wykres danych
-        fig, ax = plt.subplots()
-        ax.scatter(df['data'], df['zuzycie'], color='black', label='Dane rzeczywiste')
-        ax.plot(df['data'], model.predict(df['timestamp'].values.reshape(-1,1)), color='blue', linewidth=3, label='Linia trendu')
-        ax.set_xlabel('Data')
-        ax.set_ylabel('Zużycie wody')
-        ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        plt.legend()
-        st.pyplot(fig)
+    fig, ax = plt.subplots()
+    ax.scatter(df['data'], df['zuzycie'], color='black', label='Dane rzeczywiste')
+    ax.plot(df['data'], model.predict(df['timestamp'].values.reshape(-1,1)), color='blue', linewidth=3, label='Linia trendu')
+    ax.set_xlabel('Data')
+    ax.set_ylabel('Zużycie wody')
+    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.legend()
+    st.pyplot(fig)
 
         # Wybór daty do predykcji
-        selected_date = st.date_input("Wybierz datę do predykcji zużycia wody")
+    selected_date = st.date_input("Wybierz datę do predykcji zużycia wody")
         if st.button('Przewiduj'):
             selected_date = dt.datetime.strptime(str(selected_date), '%Y-%m-%d')
             selected_date_ordinal = selected_date.toordinal()
