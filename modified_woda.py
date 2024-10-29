@@ -9,13 +9,20 @@ from matplotlib.dates import DateFormatter
 import datetime as dt
 
 # Funkcja do wczytywania danych
+# Funkcja do wczytywania danych
 def load_data():
-    df = pd.read_excel('/mnt/data/2810zuzycie_test.xlsx')
+    
+    file_path = '2810zuzycie_test.xlsx'
+    try:
+        df = pd.read_excel(file_path)
+    except FileNotFoundError:
+        st.write("Plik '2810zuzycie_test_xlsx.xlsx' nie został znaleziony w lokalnym katalogu.")
+        st.stop()
+    
     df['data'] = pd.to_datetime(df['data'])  # konwersja kolumny 'data' na typ datetime
     df['zuzycie'] = pd.to_numeric(df['zuzycie'], errors='coerce')  # konwersja kolumny 'zuzycie' na numeryczną
     df = df.dropna().reset_index(drop=True)
     return df
-
 # Główna funkcja aplikacji
 def main():
     st.title('Predykcja zużycia wody')
