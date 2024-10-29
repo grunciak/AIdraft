@@ -10,7 +10,7 @@ from imblearn.combine import SMOTEENN
 import datetime
 
 # Streamlit interface
-st.title('Predykcja Alarmów z Pojedynczego Pliku')
+st.title('Predykcja Alarmów')
 st.write('Wgraj plik z danymi i wybierz kolumnę alarmu oraz datę, aby zobaczyć, czy wystąpi alarm.')
 
 uploaded_file = st.file_uploader("Wgraj plik z danymi", type=["xlsx"])
