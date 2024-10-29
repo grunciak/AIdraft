@@ -7,7 +7,7 @@ from xgboost import XGBClassifier
 import datetime
 
 # Streamlit interface
-st.title('Predykcja Alarmów z Pojedynczego Pliku')
+st.title('Predykcja Alarmów')
 st.write('Wgraj plik z danymi i wybierz kolumnę alarmu oraz datę, aby zobaczyć, czy wystąpi alarm.')
 
 # File uploader for the merged data
