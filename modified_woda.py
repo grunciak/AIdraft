@@ -19,15 +19,15 @@ def load_data():
 # Główna funkcja aplikacji
 def main():
     st.title('Predykcja zużycia wody')
-st.write('przewidywanie zużycia wody na podstawie wcześniejszych danych.')
+    st.write('przewidywanie zużycia wody na podstawie wcześniejszych danych.')
 
     # Wczytanie pliku
     # uploaded_file = st.file_uploader("Wybierz plik Excel", type=["xls","xlsx"])
     df = load_data()
-        
+
         # Wyświetlanie załadowanych danych
-st.write("Wyświetlanie pierwszych 5 wierszy danych:")
-st.write(df.head())
+        st.write("Wyświetlanie pierwszych 5 wierszy danych:")
+        st.write(df.head())
 
         # Przygotowanie danych do modelu
         df['timestamp'] = df['data'].map(dt.datetime.toordinal)
@@ -48,8 +48,8 @@ st.write(df.head())
         mse = mean_squared_error(y_test, y_pred)
         r2 = r2_score(y_test, y_pred)
 
-st.write(f'Błąd średniokwadratowy (MSE): {mse:.2f}')
-st.write(f'Współczynnik determinacji (R^2): {r2:.2f}')
+        st.write(f'Błąd średniokwadratowy (MSE): {mse:.2f}')
+        st.write(f'Współczynnik determinacji (R^2): {r2:.2f}')
 
         # Wykres danych
         fig, ax = plt.subplots()
@@ -69,7 +69,7 @@ st.write(f'Współczynnik determinacji (R^2): {r2:.2f}')
             selected_date = dt.datetime.strptime(str(selected_date), '%Y-%m-%d')
             selected_date_ordinal = selected_date.toordinal()
             predicted_consumption = model.predict([[selected_date_ordinal]])
-st.write(f'Przewidywane zużycie wody na dzień {selected_date.date()}: {predicted_consumption[0]:.2f}')
+            st.write(f'Przewidywane zużycie wody na dzień {selected_date.date()}: {predicted_consumption[0]:.2f}')
 
 if __name__ == '__main__':
     main()
