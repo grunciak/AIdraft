@@ -19,7 +19,7 @@ def load_data(uploaded_file):
 # Główna funkcja aplikacji
 def main():
     st.title('Predykcja zużycia wody')
-    st.write('Aplikacja do przewidywania zużycia wody na podstawie wcześniejszych danych.')
+    st.write('przewidywanie zużycia wody na podstawie wcześniejszych danych.')
 
     # Wczytanie pliku
     uploaded_file = st.file_uploader("Wybierz plik Excel", type=["xls","xlsx"])
