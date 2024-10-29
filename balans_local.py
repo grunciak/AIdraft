@@ -11,7 +11,7 @@ import datetime
 
 # Streamlit interface
 st.title('Predykcja Alarmów')
-st.write('Dane zostaną automatycznie wczytane z pliku "2810Merged_PM_Data2.xlsx" w lokalnym katalogu.')
+st.write('Dane zostaną automatycznie wczytane.')
 
 # Wczytywanie pliku lokalnie
 file_path = '2810Merged_PM_Data2.xlsx'
