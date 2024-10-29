@@ -10,7 +10,7 @@ from imblearn.combine import SMOTEENN
 import datetime
 
 # Streamlit interface
-st.title('Predykcja Alarmów z Automatycznie Wczytywanego Pliku')
+st.title('Predykcja Alarmów')
 st.write('Dane zostaną automatycznie wczytane z pliku "2810Merged_PM_Data2.xlsx" w lokalnym katalogu.')
 
 # Wczytywanie pliku lokalnie
