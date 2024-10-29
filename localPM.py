@@ -8,10 +8,16 @@ import datetime
 
 # Streamlit interface
 st.title('Predykcja Alarmów')
-st.write('Wgraj plik z danymi i wybierz kolumnę alarmu oraz datę, aby zobaczyć, czy wystąpi alarm.')
+st.write(' Wybierz kolumnę alarmu oraz datę, aby zobaczyć, czy wystąpi alarm.')
 
 # File uploader for the merged data
-uploaded_file = st.file_uploader("Wgraj plik z danymi", type=["xlsx"])
+# Wczytywanie pliku lokalnie
+file_path = '2810Merged_PM_Data2.xlsx'
+try:
+    data = pd.read_excel(file_path)
+except FileNotFoundError:
+    st.write("Plik '2810Merged_PM_Data2.xlsx' nie został znaleziony w lokalnym katalogu.")
+    st.stop()
 
 if uploaded_file:
     # Read the uploaded Excel file
