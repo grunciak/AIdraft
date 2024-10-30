@@ -4,6 +4,9 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from xgboost import XGBClassifier
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.combine import SMOTEENN
 import datetime
 
 # Streamlit interface
@@ -47,11 +50,40 @@ if alarm_columns:
     # Features for the model
     features = [col for col in data.columns if col not in ['date', selected_alarm]]
 
-    # Train the model on historical data
+    # Option to handle imbalanced data
+    imbalance_option = st.selectbox(
+        'Wybierz metodę dla niezbalansowanych danych:',
+        ('Bez modyfikacji', 'SMOTE', 'Undersampling', 'SMOTEENN')
+    )
+
+    # Prepare data for model training
     X = data[features]
     y = data[selected_alarm]
+
+    # Apply chosen imbalance handling method
+    if imbalance_option == 'SMOTE':
+        X, y = SMOTE().fit_resample(X, y)
+    elif imbalance_option == 'Undersampling':
+        X, y = RandomUnderSampler().fit_resample(X, y)
+    elif imbalance_option == 'SMOTEENN':
+        X, y = SMOTEENN().fit_resample(X, y)
+
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Model training
     model = XGBClassifier()
-    model.fit(X, y)
+    model.fit(X_train, y_train)
+
+    # Predictions for evaluation
+    y_pred = model.predict(X_test)
+
+    # Display model evaluation metrics
+    st.write("Miary jakości modelu:")
+    st.write("Precyzja:", precision_score(y_test, y_pred))
+    st.write("Recall:", recall_score(y_test, y_pred))
+    st.write("F1 Score:", f1_score(y_test, y_pred))
+    st.write("Dokładność:", accuracy_score(y_test, y_pred))
 
     # Future date input for single-day prediction
     max_date_in_data = data['date'].max()
