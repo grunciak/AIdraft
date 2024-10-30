@@ -53,12 +53,16 @@ if alarm_columns:
     model = XGBClassifier()
     model.fit(X, y)
 
-    # User date input, allowing future dates
+    # Future date input for single-day prediction
     max_date_in_data = data['date'].max()
     future_max_date = max_date_in_data + datetime.timedelta(days=365)
-    selected_date = st.date_input('Wybierz datę', min_value=max_date_in_data, max_value=future_max_date)
+    selected_date = st.date_input(
+        'Wybierz datę do przewidzenia alarmu', 
+        min_value=max_date_in_data, 
+        max_value=future_max_date
+    )
 
-    # Prepare features for the selected future date
+    # Function to prepare features for the selected date
     def prepare_features(date):
         hour = date.hour
         day_of_week = date.weekday()
@@ -71,7 +75,7 @@ if alarm_columns:
         return recent_data[features]
 
     # Prediction for the selected future date
-    if st.button('Sprawdź alarm'):
+    if st.button('Przewidź alarm dla wybranej daty'):
         input_data = prepare_features(pd.to_datetime(selected_date))
         prediction = model.predict(input_data)
         if prediction[0] == 1:
