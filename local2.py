@@ -42,7 +42,6 @@ st.write("Zidentyfikowane kolumny alarmów:", alarm_columns)
  # Diagnostyka - sprawdzenie rozkładu klas przed SMOTE
 class_counts = y_train.value_counts()
 st.write("Rozkład klas w y_train:", class_counts)
-
 if alarm_columns:
     # Selectbox for choosing the alarm column
     selected_alarm = st.selectbox('Wybierz kolumnę alarmu', alarm_columns)
