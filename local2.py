@@ -93,7 +93,11 @@ if alarm_columns:
         min_value=max_date_in_data, 
         max_value=future_max_date
     )
-
+ # Analiza korelacji
+    st.write("## Korelacja cech z wybraną kolumną alarmową")
+    correlation_matrix = data[features + [selected_alarm]].corr()
+    st.write("Korelacje między cechami a kolumną alarmową:")
+    st.dataframe(correlation_matrix[[selected_alarm]].sort_values(by=selected_alarm, ascending=False))
     # Function to prepare features for the selected date
     def prepare_features(date):
         hour = date.hour
