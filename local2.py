@@ -49,6 +49,9 @@ if alarm_columns:
     # Features for the model
     features = [col for col in data.columns if col not in ['date', selected_alarm]]
 
+     # Diagnostyka - sprawdzenie rozkładu klas przed SMOTE
+    class_counts = y_train.value_counts()
+    st.write("Rozkład klas w y_train:", class_counts)
     # Option to handle imbalanced data
     imbalance_option = st.selectbox(
         'Wybierz metodę dla niezbalansowanych danych:',
